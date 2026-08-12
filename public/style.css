@@ -1,0 +1,305 @@
+:root {
+  --bg: #f4f4f2;
+  --panel: #ffffff;
+  --border: #e0ddd6;
+  --text: #2b2a28;
+  --muted: #8a8578;
+  --accent: #7a6a53;
+  --accent-light: #ece7dd;
+  --todo: #b98b3e;
+  --doing: #4a7a9d;
+  --done: #4a8a5a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+#sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+#sidebar h1 {
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+
+#category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+#category-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+
+#category-list li:hover {
+  background: var(--accent-light);
+}
+
+#category-list li.active {
+  background: var(--accent-light);
+  font-weight: 600;
+}
+
+#category-list li.drag-over {
+  outline: 2px dashed var(--accent);
+}
+
+#category-list .cat-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#category-list .cat-count {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+#category-list .cat-actions {
+  display: none;
+  gap: 4px;
+}
+
+#category-list li:hover .cat-actions {
+  display: flex;
+}
+
+#category-list .cat-actions button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 0 2px;
+}
+
+#category-list .cat-actions button:hover {
+  color: var(--text);
+}
+
+#new-category-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+#empty-state {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+#board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+#category-title {
+  margin: 0;
+  font-size: 22px;
+}
+
+#view-toggle button {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#view-toggle button:first-child { border-radius: 6px 0 0 6px; }
+#view-toggle button:last-child { border-radius: 0 6px 6px 0; margin-left: -1px; }
+
+#view-toggle button.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+#kanban-view {
+  display: flex;
+  gap: 16px;
+}
+
+.column {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.column h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.column[data-status="todo"] h3 { color: var(--todo); }
+.column[data-status="doing"] h3 { color: var(--doing); }
+.column[data-status="done"] h3 { color: var(--done); }
+
+.add-task-form input {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.card-list.drag-over {
+  background: var(--accent-light);
+  border-radius: 8px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--muted);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: grab;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.column[data-status="todo"] .card { border-left-color: var(--todo); }
+.column[data-status="doing"] .card { border-left-color: var(--doing); }
+.column[data-status="done"] .card { border-left-color: var(--done); }
+
+.card.dragging {
+  opacity: 0.4;
+}
+
+.card .card-title {
+  flex: 1;
+  outline: none;
+  word-break: break-word;
+}
+
+.card .card-delete {
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.card .card-delete:hover {
+  color: #c0392b;
+}
+
+#list-view .add-task-form {
+  max-width: 400px;
+  margin-bottom: 20px;
+}
+
+.list-group {
+  margin-bottom: 20px;
+}
+
+.list-group h3 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.list-group[data-status="todo"] h3 { color: var(--todo); }
+.list-group[data-status="doing"] h3 { color: var(--doing); }
+.list-group[data-status="done"] h3 { color: var(--done); }
+
+.task-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task-rows li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.task-rows li .row-title {
+  flex: 1;
+  outline: none;
+}
+
+.task-rows select {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 3px 5px;
+}
+
+.task-rows .card-delete {
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.task-rows .card-delete:hover {
+  color: #c0392b;
+}
+
+.hidden {
+  display: none !important;
+}

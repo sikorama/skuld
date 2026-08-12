@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Todo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <h1>Todo</h1>
+    <ul id="category-list"></ul>
+    <form id="new-category-form">
+      <input id="new-category-input" type="text" placeholder="Nouvelle catégorie…" autocomplete="off">
+    </form>
+  </aside>
+
+  <main id="main">
+    <div id="empty-state" class="hidden">
+      <p>Choisis ou crée une catégorie pour commencer.</p>
+    </div>
+
+    <div id="board-wrap" class="hidden">
+      <header id="board-header">
+        <h2 id="category-title"></h2>
+        <div id="view-toggle">
+          <button data-view="kanban" class="active">Kanban</button>
+          <button data-view="list">Liste</button>
+        </div>
+      </header>
+
+      <div id="kanban-view">
+        <div class="column" data-status="todo">
+          <h3>À faire</h3>
+          <form class="add-task-form" data-status="todo">
+            <input type="text" placeholder="Ajouter une tâche…" autocomplete="off">
+          </form>
+          <div class="card-list" data-status="todo"></div>
+        </div>
+        <div class="column" data-status="doing">
+          <h3>En cours</h3>
+          <form class="add-task-form" data-status="doing">
+            <input type="text" placeholder="Ajouter une tâche…" autocomplete="off">
+          </form>
+          <div class="card-list" data-status="doing"></div>
+        </div>
+        <div class="column" data-status="done">
+          <h3>Fait</h3>
+          <form class="add-task-form" data-status="done">
+            <input type="text" placeholder="Ajouter une tâche…" autocomplete="off">
+          </form>
+          <div class="card-list" data-status="done"></div>
+        </div>
+      </div>
+
+      <div id="list-view" class="hidden">
+        <form class="add-task-form" data-status="todo">
+          <input type="text" placeholder="Ajouter une tâche…" autocomplete="off">
+        </form>
+        <div class="list-group" data-status="todo">
+          <h3>À faire</h3>
+          <ul class="task-rows" data-status="todo"></ul>
+        </div>
+        <div class="list-group" data-status="doing">
+          <h3>En cours</h3>
+          <ul class="task-rows" data-status="doing"></ul>
+        </div>
+        <div class="list-group" data-status="done">
+          <h3>Fait</h3>
+          <ul class="task-rows" data-status="done"></ul>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
