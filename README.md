@@ -1,34 +1,34 @@
 # Todo
 
-Gestionnaire de tâches minimaliste, sans dépendance (Node.js stdlib
-uniquement — `http` + `node:sqlite`), déployable sur un NAS.
+Minimalist, dependency-free task manager (Node.js stdlib only — `http` +
+`node:sqlite`), deployable on a NAS.
 
-## Fonctionnalités
+## Features
 
-- Catégories (ex : code, jardin, travaux maison), renommables, réordonnables
-  par glisser-déposer, supprimables (avec leurs tâches).
-- Tâches sans dépendances, sans estimation, sans échéance — juste un statut :
-  **à faire / en cours / fait**.
-- Vue **Kanban** : glisser une carte d'une colonne à l'autre.
-- Vue **Liste** : même contenu, groupé par statut, changement de statut via
-  menu déroulant.
-- Titre de tâche éditable en place (clic dedans, `Entrée` ou clic ailleurs
-  pour valider).
+- Categories (e.g. code, garden, home improvement), renamable, reorderable
+  via drag-and-drop, deletable (along with their tasks).
+- Tasks with no dependencies, no estimates, no due dates — just a status:
+  **to do / in progress / done**.
+- **Kanban** view: drag a card from one column to another.
+- **List** view: same content, grouped by status, status change via
+  dropdown menu.
+- Inline-editable task title (click inside, `Enter` or click elsewhere to
+  confirm).
 
-## Déploiement
+## Deployment
 
-Requiert **Node.js ≥ 22.5** (pour `node:sqlite`).
+Requires **Node.js ≥ 22.5** (for `node:sqlite`).
 
 ```bash
 node server.js            # http://localhost:8322
-PORT=9000 node server.js  # pour changer de port
+PORT=9000 node server.js  # to change the port
 ```
 
-`todo.db` (SQLite) est créée automatiquement au premier lancement et est
-l'unique source de vérité — aucune base externe, aucune étape de build.
+`todo.db` (SQLite) is created automatically on first run and is the sole
+source of truth — no external database, no build step.
 
 ## Structure
 
-- `lib/db.js` — schéma SQLite et connexion
-- `server.js` — API REST + fichiers statiques
-- `public/` — front-end (HTML/CSS/JS vanilla, sans build)
+- `lib/db.js` — SQLite schema and connection
+- `server.js` — REST API + static files
+- `public/` — front-end (vanilla HTML/CSS/JS, no build)
