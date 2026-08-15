@@ -273,6 +273,12 @@ body {
   flex: 1;
   outline: none;
   word-break: break-word;
+  cursor: grab;
+}
+
+.card .card-title.editing {
+  white-space: pre-wrap;
+  cursor: text;
 }
 
 .card .card-delete {
@@ -327,6 +333,10 @@ body {
 .task-rows li .row-title {
   flex: 1;
   outline: none;
+}
+
+.task-rows li .row-title.editing {
+  white-space: pre-wrap;
 }
 
 .task-rows select {

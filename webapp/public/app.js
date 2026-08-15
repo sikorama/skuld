@@ -204,27 +204,76 @@ function tasksByStatus(status) {
   return state.tasks.filter((t) => t.status === status).sort((a, b) => a.position - b.position);
 }
 
-function makeCardTitle(task) {
-  const title = document.createElement('span');
-  title.className = 'card-title';
-  title.textContent = task.title;
-  title.contentEditable = 'true';
+function insertNewlineAtCaret() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  range.deleteContents();
+  const nl = document.createTextNode('\n');
+  range.insertNode(nl);
+  range.setStartAfter(nl);
+  range.setEndAfter(nl);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+function makeEditableTitle(task, className, card) {
+  const title = document.createElement('div');
+  title.className = `${className} markdown-lite`;
   title.spellcheck = false;
-  title.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      title.blur();
-    }
-  });
-  title.addEventListener('blur', async () => {
+  title.contentEditable = 'false';
+
+  function renderView() {
+    title.innerHTML = renderMiniMarkdown(task.title);
+  }
+  renderView();
+
+  function startEdit() {
+    title.contentEditable = 'true';
+    title.classList.add('editing');
+    title.textContent = task.title;
+    if (card) card.draggable = false;
+    title.focus();
+    const range = document.createRange();
+    range.selectNodeContents(title);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  async function endEdit() {
+    title.contentEditable = 'false';
+    title.classList.remove('editing');
+    if (card) card.draggable = true;
     const value = title.textContent.trim();
     if (value && value !== task.title) {
       task.title = value;
       await api(`/api/tasks/${task.id}`, { method: 'PATCH', body: JSON.stringify({ title: value }) });
-    } else {
-      title.textContent = task.title;
+    }
+    renderView();
+  }
+
+  title.addEventListener('dblclick', (e) => {
+    e.stopPropagation();
+    if (title.contentEditable !== 'true') startEdit();
+  });
+  title.addEventListener('mousedown', (e) => {
+    if (title.contentEditable === 'true') e.stopPropagation();
+  });
+  title.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      insertNewlineAtCaret();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      title.blur();
     }
   });
+  title.addEventListener('blur', () => {
+    if (title.contentEditable === 'true') endEdit();
+  });
+
   return title;
 }
 
@@ -250,11 +299,8 @@ function renderKanban() {
       card.className = 'card';
       card.draggable = true;
       card.dataset.id = task.id;
-      card.append(makeCardTitle(task), makeDeleteBtn(task));
+      card.append(makeEditableTitle(task, 'card-title', card), makeDeleteBtn(task));
 
-      card.addEventListener('mousedown', (e) => {
-        card.draggable = !e.target.closest('.card-title');
-      });
       card.addEventListener('dragstart', (e) => {
         card.classList.add('dragging');
         e.dataTransfer.setData('text/task-id', String(task.id));
@@ -304,26 +350,7 @@ function renderList() {
     for (const task of tasksByStatus(status)) {
       const li = document.createElement('li');
 
-      const title = document.createElement('span');
-      title.className = 'row-title';
-      title.textContent = task.title;
-      title.contentEditable = 'true';
-      title.spellcheck = false;
-      title.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          title.blur();
-        }
-      });
-      title.addEventListener('blur', async () => {
-        const value = title.textContent.trim();
-        if (value && value !== task.title) {
-          task.title = value;
-          await api(`/api/tasks/${task.id}`, { method: 'PATCH', body: JSON.stringify({ title: value }) });
-        } else {
-          title.textContent = task.title;
-        }
-      });
+      const title = makeEditableTitle(task, 'row-title');
 
       const select = document.createElement('select');
       for (const s of STATUSES) {
