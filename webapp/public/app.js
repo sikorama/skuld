@@ -19,7 +19,44 @@ const el = {
   viewToggle: document.getElementById('view-toggle'),
   kanbanView: document.getElementById('kanban-view'),
   listView: document.getElementById('list-view'),
+  notesView: document.getElementById('notes-view'),
+  notesEdit: document.getElementById('notes-edit'),
 };
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+const URL_RE = /(https?:\/\/[^\s<]+)/g;
+const BOLD_RE = /\*([^*]+)\*/g;
+
+function renderInline(text) {
+  return escapeHtml(text)
+    .replace(BOLD_RE, '<strong>$1</strong>')
+    .replace(URL_RE, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+function renderMiniMarkdown(text) {
+  const lines = (text || '').split('\n');
+  let html = '';
+  let inList = false;
+  for (const line of lines) {
+    const item = /^\s*-\s+(.*)$/.exec(line);
+    if (item) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${renderInline(item[1])}</li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      if (line.trim()) html += `<div>${renderInline(line)}</div>`;
+      else html += '<br>';
+    }
+  }
+  if (inList) html += '</ul>';
+  return html;
+}
 
 async function api(path, opts) {
   const res = await fetch(path, {
@@ -132,9 +169,36 @@ async function refreshBoard() {
   el.emptyState.classList.add('hidden');
   el.boardWrap.classList.remove('hidden');
   el.categoryTitle.textContent = cat.name;
+  renderNotes(cat.notes);
   await loadTasks();
   renderTasks();
 }
+
+function renderNotes(notes) {
+  el.notesEdit.value = notes || '';
+  el.notesView.innerHTML = renderMiniMarkdown(notes);
+  el.notesView.classList.remove('hidden');
+  el.notesEdit.classList.add('hidden');
+}
+
+el.notesView.addEventListener('click', (e) => {
+  if (e.target.closest('a')) return;
+  if (!state.activeCategoryId) return;
+  el.notesView.classList.add('hidden');
+  el.notesEdit.classList.remove('hidden');
+  el.notesEdit.focus();
+});
+
+el.notesEdit.addEventListener('blur', async () => {
+  const cat = state.categories.find((c) => c.id === state.activeCategoryId);
+  if (!cat) return;
+  const value = el.notesEdit.value;
+  if (value !== cat.notes) {
+    cat.notes = value;
+    await api(`/api/categories/${cat.id}`, { method: 'PATCH', body: JSON.stringify({ notes: value }) });
+  }
+  renderNotes(value);
+});
 
 function tasksByStatus(status) {
   return state.tasks.filter((t) => t.status === status).sort((a, b) => a.position - b.position);
@@ -188,6 +252,9 @@ function renderKanban() {
       card.dataset.id = task.id;
       card.append(makeCardTitle(task), makeDeleteBtn(task));
 
+      card.addEventListener('mousedown', (e) => {
+        card.draggable = !e.target.closest('.card-title');
+      });
       card.addEventListener('dragstart', (e) => {
         card.classList.add('dragging');
         e.dataTransfer.setData('text/task-id', String(task.id));

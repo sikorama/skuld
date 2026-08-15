@@ -49,7 +49,7 @@ function rowToCategory(row) {
     .all(row.id);
   const byStatus = { todo: 0, doing: 0, done: 0 };
   for (const c of counts) byStatus[c.status] = c.n;
-  return { id: row.id, name: row.name, position: row.position, counts: byStatus };
+  return { id: row.id, name: row.name, position: row.position, notes: row.notes || '', counts: byStatus };
 }
 
 function rowToTask(row) {
@@ -105,6 +105,9 @@ async function handleApi(req, res, url) {
       const body = await readJsonBody(req);
       if (typeof body.name === 'string' && body.name.trim()) {
         db.prepare('UPDATE categories SET name = ? WHERE id = ?').run(body.name.trim(), id);
+      }
+      if (typeof body.notes === 'string') {
+        db.prepare('UPDATE categories SET notes = ? WHERE id = ?').run(body.notes, id);
       }
       const row = db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
       if (!row) return sendJson(res, 404, { error: 'not found' });

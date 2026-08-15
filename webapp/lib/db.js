@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS categories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   position INTEGER NOT NULL DEFAULT 0,
+  notes TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS tasks (
@@ -30,6 +31,10 @@ function openDb() {
   const db = new DatabaseSync(DB_PATH);
   db.exec('PRAGMA foreign_keys = ON');
   db.exec(SCHEMA);
+  const columns = db.prepare('PRAGMA table_info(categories)').all();
+  if (!columns.some((c) => c.name === 'notes')) {
+    db.exec("ALTER TABLE categories ADD COLUMN notes TEXT NOT NULL DEFAULT ''");
+  }
   return db;
 }
 
